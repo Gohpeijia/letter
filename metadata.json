@@ -1,0 +1,7 @@
+{
+  "name": "Penguin Birthday Surprise",
+  "description": "A cute, penguin-themed birthday gift letter with music, animations, and interactive elements designed for a special friend.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

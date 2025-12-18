@@ -1,10 +1,12 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Music, Play, Pause, Heart } from 'lucide-react';
+import { Music, Play, Pause, Heart, Send } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import Snowfall from './components/Snowfall';
 import { Penguin } from './components/Penguin';
 import musicUrl from './musicletter.mp3'; 
+// Add 'Send' to your lucide-react imports
+import emailjs from '@emailjs/browser'; // Add this
 
 const App: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,6 +14,8 @@ const App: React.FC = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const letterRef = useRef<HTMLDivElement | null>(null);
   const hasCelebrated = useRef(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const [isSending, setIsSending] = useState(false);
 
 const handleOpen = () => {
     setIsOpen(true);
@@ -29,6 +33,39 @@ const handleOpen = () => {
       origin: { y: 0.6 },
       colors: ['#FFC0CB', '#B0E0E6', '#FFFFFF']
     });
+  };
+
+const sendNotification = () => {
+    if (emailSent) return;
+    setIsSending(true);
+
+    // You need to get these 3 IDs from emailjs.com (It's free)
+    const SERVICE_ID = "peiiii";
+    const TEMPLATE_ID = "template_6gendod";
+    const PUBLIC_KEY = "vqWf53T_BGO_M4-h0";
+
+    const templateParams = {
+      to_email: "25128737@imail.sunway.edu.my",
+      message: "She has finished reading your letter! 🐧❤️",
+    };
+
+    emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams, PUBLIC_KEY)
+      .then(() => {
+        setEmailSent(true);
+        setIsSending(false);
+        // Trigger a mini celebration
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.9 },
+          colors: ['#FFD700', '#FF69B4']
+        });
+      })
+      .catch((error) => {
+        console.error('Failed to send:', error);
+        setIsSending(false);
+        alert("发送失败，可能是网络问题 🤕");
+      });
   };
 
 const toggleMusic = () => {
@@ -139,7 +176,30 @@ return (
                 <div>2025年11月01日</div>
               </div>
             </div>
-
+              <div className="mt-12 flex justify-center border-t border-gray-100 pt-8">
+            <button 
+              onClick={sendNotification}
+              disabled={emailSent || isSending}
+              className={`
+                flex items-center gap-2 px-6 py-3 rounded-full shadow-md transition-all duration-300
+                ${emailSent 
+                  ? 'bg-green-100 text-green-600 cursor-default' 
+                  : 'bg-pink-50 text-pink-500 hover:bg-pink-100 hover:scale-105 active:scale-95'
+                }
+              `}
+            >
+              {isSending ? (
+                <span>发送中... 📨</span>
+              ) : emailSent ? (
+                <span>已通知吴帅 ❤️</span>
+              ) : (
+                <>
+                  <span>告诉他我读完了</span>
+                  <Send size={18} />
+                </>
+              )}
+            </button>
+          </div>
             {/* Side Penguins peeking */}
             <Penguin className="absolute -right-6 top-1/2 -translate-y-1/2 rotate-90 z-20" />
             <Penguin className="absolute -left-6 bottom-40 -rotate-90 z-20" />
